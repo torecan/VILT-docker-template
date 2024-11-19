@@ -1,0 +1,161 @@
+services:
+  nginx:
+    container_name: nginx_PROJECT_NAME
+    image: nginx:latest
+    ports:
+      - "8000:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./PROJECT_NAME:/src/app
+    depends_on:
+      - php
+    networks:
+      - NETWORK_NAME
+      
+  php:
+    container_name: php_PROJECT_NAME
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    volumes:
+      - ./PROJECT_NAME:/src/app
+    networks:
+      - NETWORK_NAME
+
+  mysql:
+    container_name: mysql_PROJECT_NAME
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment: 
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    networks:
+      - NETWORK_NAME
+
+  phpmyadmin:
+      container_name: phpmyadmin_PROJECT_NAME
+      image: phpmyadmin/phpmyadmin:latest
+      environment:
+        PMA_HOST: mysql_PROJECT_NAME
+        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      ports:
+        - "8081:80"
+      depends_on:
+        - mysql
+      networks:
+        - NETWORK_NAME
+
+  nodejs:
+    container_name: node_PROJECT_NAME
+    image: node:latest
+    volumes:
+      - ./PROJECT_NAME:/src/app
+    working_dir: /src/app
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev && tail -f /dev/null"
+    networks:
+      - NETWORK_NAME
+
+  # fluentbit:
+  #   image: fluent/fluent-bit:latest
+  #   container_name: fluentbit_PROJECT_NAME
+  #   volumes:
+  #     - ./fluent-bit:/fluent-bit/etc  # Your custom Fluent Bit configuration
+  #     - ./PROJECT_NAME/storage/logs:/var/log/laravel  # Path to your Laravel logs
+  #   ports:
+  #     - "2020:2020"  # Fluent Bit's HTTP interface for diagnostics (optional)
+  #     - "24224:24224"  # Fluent Bit's input port for receiving logs
+  #   networks:
+  #     - NETWORK_NAME
+
+  # opensearch-node1: # This is also the hostname of the container within the Docker network (i.e. https://opensearch-node1/)
+  #   image: opensearchproject/opensearch:latest
+  #   container_name: opensearch-node1
+  #   environment:
+  #     - cluster.name=opensearch-cluster # Name the cluster
+  #     - node.name=opensearch-node1 # Name the node that will run in this container
+  #     - discovery.seed_hosts=opensearch-node1,opensearch-node2 # Nodes to look for when discovering the cluster
+  #     - cluster.initial_cluster_manager_nodes=opensearch-node1,opensearch-node2 # Nodes eligibile to serve as cluster manager
+  #     - bootstrap.memory_lock=true # Disable JVM heap memory swapping
+  #     - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m" # Set min and max JVM heap sizes to at least 50% of system RAM
+  #     - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD} # Sets the demo admin user password when using demo configuration (for OpenSearch 2.12 and later)
+  #   ulimits:
+  #     memlock:
+  #       soft: -1
+  #       hard: -1
+  #     nofile:
+  #       soft: 65536 
+  #       hard: 65536
+  #   volumes:
+  #     - opensearch-data1:/usr/share/opensearch/data 
+  #   ports:
+  #     - 9200:9200 # REST API
+  #     - 9600:9600 # Performance Analyzer
+  #   networks:
+  #     - NETWORK_NAME # All of the containers will join the same Docker bridge network
+  
+  # opensearch-node2:
+  #   image: opensearchproject/opensearch:latest # This should be the same image used for opensearch-node1 to avoid issues
+  #   container_name: opensearch-node2
+  #   environment:
+  #     - cluster.name=opensearch-cluster
+  #     - node.name=opensearch-node2
+  #     - discovery.seed_hosts=opensearch-node1,opensearch-node2
+  #     - cluster.initial_cluster_manager_nodes=opensearch-node1,opensearch-node2
+  #     - bootstrap.memory_lock=true
+  #     - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+  #     - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
+  #   ulimits:
+  #     memlock:
+  #       soft: -1
+  #       hard: -1
+  #     nofile:
+  #       soft: 65536
+  #       hard: 65536
+  #   volumes:
+  #     - opensearch-data2:/usr/share/opensearch/data
+  #   networks:
+  #     - NETWORK_NAME
+  
+  # opensearch-dashboards:
+  #   image: opensearchproject/opensearch-dashboards:latest
+  #   container_name: opensearch-dashboards
+  #   ports:
+  #     - 5601:5601 
+  #   expose:
+  #     - "5601" 
+  #   environment:
+  #     OPENSEARCH_HOSTS: '["https://opensearch-node1:9200","https://opensearch-node2:9200"]' # Define the OpenSearch nodes that OpenSearch Dashboards will query
+  #   networks:
+  #     - NETWORK_NAME
+
+  # mailhog-PROJECT_NAME:
+  #   container_name: mailhog-PROJECT_NAME-2
+  #   image: mailhog/mailhog
+  #   ports:
+  #     - 1025:1025
+  #     - 8025:8025
+  #   networks:
+  #     - NETWORK_NAME
+
+  # redis-PROJECT_NAME:
+  #   container_name: redis-PROJECT_NAME
+  #   image: redis:alpine
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - NETWORK_NAME
+
+# volumes:
+#   opensearch-data1:
+#   opensearch-data2:
+
+networks:
+  NETWORK_NAME:
+
