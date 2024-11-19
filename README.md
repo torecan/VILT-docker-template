@@ -26,5 +26,5 @@ included containers
 1. replace PROJECT_NAME with your project name
 2. replace NETWORK_NAME with your network name
 3. copy .env.example to .env and provide your configs
-4. docker-compose run -d
+4. docker-compose up -d
 
