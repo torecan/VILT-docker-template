@@ -4,15 +4,15 @@ Docker containers for a VILT project on local
 
 included containers
 
--> Nginx
--> Node
--> Php 8.2
--> Mysql
--> phpMyAdmin
--> Redis
--> Opensearch clusters
--> Opensearch-Dashboard
--> Fluent-bit
+* Nginx
+* Node
+* Php 8.2
+* Mysql
+* phpMyAdmin
+* Redis
+* Opensearch clusters
+* Opensearch-Dashboard
+* Fluent-bit
 
 ## How to use
 
